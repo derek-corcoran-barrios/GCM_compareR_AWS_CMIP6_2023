@@ -1,0 +1,46 @@
+---
+title: "Changelog"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: inline
+---
+
+### Released versions
+
+#### Version 1.0.1 (Jan 20, 2020)
+- Fixes to include reference to the paper and other minor corrections
+- Version accepted in Methods of Ecology and Evolution
+
+***
+
+#### Version 1.0.0 (Oct 18, 2018)
+- Release of GCM compareR v1.0.0
+
+***
+
+#### Version 0.9.2 (Sep 26, 2018)
+- Update in text in all panels from the Intro tab.
+
+***
+
+#### Version 0.9.1 (Aug 21, 2018)
+- Update in tab names.
+
+***
+
+#### Version 0.9 (Aug 21, 2018)
+- Corrected an error where result tabs were disabled after a second use of the ANALYZE! button.
+- Corrected an error that caused the report to include figures from old executions.
+- Short instruccion for rectangle selection added below the map in the study area tab.
+- Warnings added about overlap between rectangle selection and countries/biomes/ecoregions.
+- Tab added with information for GCMs (developing institutions, full name, website...).
+- Intro is selected as default tab when starting.
+
+***
+
+#### Version 0.8 (before Aug 21, 2018)
+(This was the first version online shared between authors when sharing the manuscript draft)

@@ -1,0 +1,52 @@
+
+
+
+<div id="workflow" class="section level4">
+<h4>Workflow</h4>
+<p>GCM compareR web App is designed in tabs to separate the processes of defining a comparison scenario and retrieve the results. This tabs are generally used from left to right. The following is a description of the most common use of the app:</p>
+<div id="definition-of-scenario" class="section level5">
+<h5>Definition of scenario</h5>
+<p>The tab <strong>Scenario</strong> is used to define the comparison to perform. The tab is composed by a side panel, where the options are selected, and a main panel including a map where the area of interest is delimited.</p>
+<p>To start, use the options in the side panel to define the comparsion of GCMs:</p>
+<p><strong>1. Climate Model Intercomparison Project (CMIP).</strong> Choose between the most up-to-date <a href="CMIP6" target="_blank">https://www.wcrp-climate.org/wgcm-cmip/wgcm-cmip6</a>, or the previous version <a href="CMIP5" target="_blank">https://www.wcrp-climate.org/wgcm-cmip/wgcm-cmip5</a>, with a larger number of downscaled GCMs available.</p>
+<p><strong>2. Climate Change Scenario.</strong> Select a future year and a scenario. CMIP6 scenarios are known as Shared Socioeconomic Pathways (SSPs), and CMIP5 as Representative Concentration Pathway (RCP). These are standardized scenarios of future climate defined by varying emissions resulting from land use, population growth, technology and global and regional socioeconomic decisions <span class="citation">(Moss et al. 2010)</span> <span class="citation">(Riahi et al. 2017)</span>.</p>
+<p><strong>3. General Circulation Models (GCMs).</strong> Check the climatic models of interest and uncheck those that should not be included in the comparison. Use the tab <em>GCM details</em> above the map to toggle a table with details for any climate model. Not all models are available for all combination of scenarios (GCMs and year).</p>
+<p><strong>4. Type of comparison.</strong> Two posibilities are currently available: (a) compare one bioclimatic variable against another bioclimatic variable, and (b) compare two groups of bioclimatic variables. We recommend comparing temperature against precipitation variables (i.e. the default selection compares mean annual temperature agains annual precipitation). In the special case of comparing groups of variables, it is important to combine in the same group only variables that are modulated in a similar fashion (e.g. for all variables in the group higher is more and smaller is less). Notice that projections of these variables will be scaled and combined; not following this advice will make the interpretation of the results hard to interpret and likely confusing. When two single variables are compared, two types of results are produced: with the actual values of the variables and with scaled values. When groups of variables are compared, only the result of scaled values is presented, as this is a requirement for model combination.</p>
+<p><strong>5. Study area.</strong> Select one of the five options provided here and the interactive map to define your area of interest. Only pixels within the selected area will be compared.</p>
+<ul>
+<li>Define a squarred area: this can be done through the first (<em>Select drawing a rectangle over the map</em>) and the last options (<em>Enter bounding-box coordinates</em>). The draw the rectangle over the map, click first the black square icon on the upper left corner of the map, and drag later a rectangle on the map. The other option will draw the rectangle automatically after you insert minimum and maximum longitude and latitude values (this option may be prefered for replicability).<br />
+</li>
+<li>Define the study area by entering countries, biomes or ecoregions names. To use the option, select one of the other three options (<em>Select by country</em>, <em>Select by biome</em>, <em>Select by ecoregion</em>) and enter the name(s) of the item(s) in the box that will appear. More than one name may be selected. Once you enter one or more names, the map will refresh and display the selection in red (this might take a few seconds depending on your connection). This type of selections can be refined by using drawn rectangles. For instance, if you want to study the <em>Mediterranean forests, woodlands and shrubs</em> of Chile in South America, you can enclose this part of the biome in a rectangle right after the biome name has been selected and the map has turned red.</li>
+</ul>
+<p>Once you are done with selecting the study area and options, press the <strong>ANALYZE</strong> green button below the map to proceed with the calculations. Once you have pressed the button, the following tabs will become selectable and you will see a progress bar informing the execution of the analyses. You may always come back to this tab to modify your defined scenario.</p>
+</div>
+<div id="check-the-results" class="section level5">
+<h5>Check the results</h5>
+<p>The results are presented in next three tabs.</p>
+<p><strong>- Explore selected GCMs.</strong> This tab displays the climatic models select with a common color scale that permits their comparison. Each selected bioclimatic variable is shown as a different group of maps. The first map in each group shows the “baseline” variable (current climatic conditions), and the second shows the average of the values for each pixel across all GCMs.</p>
+<p><strong>- Variation from present.</strong> These results use current climate as a reference to explore GCMs’ future projections The spread of average differences can be found under the subtab <em>Spread of GCMs</em> as a scatterplot, and maps showing the spatial pattern of differences are in the subtab <em>Maps of differences</em>. The scatterplot and table may display projected values for the variables (e.g. total annual precipitation projection for each model) or their difference in respect to current climate (e.g. projected increase or decrease in annual precipitation).</p>
+<p><strong>- Variation among futures.</strong> These results use the average of GCM projects as a reference to explore differences among GCMs. The spread of mean differences can be found under the subtab <em>Spread of GCMs</em> as a scatterplot, and maps showing the spatial pattern of these differences are in the subtab <em>Maps of differences</em>. This comparison may be done using unscaled variable values or scaled (the only option when the comparison involves more than a couple of variables).</p>
+<p>Both tabs showing variation among GCM projections may be used to describe the characteristics of each climate model. The spread permits identifying groups of models with similar characteristics. Several groups of similar GCMs may provide distinct “storylines” <span class="citation">(Zappa and Shepherd 2017)</span> that the user could consider evaluating independently. These storylines represent different forecasts about future climate, and their distinct influence in the studied system could provide useful insights to study uncertainty in the response to climate.</p>
+<p>All three tabs include visualization options to add country, biome or ecoregion borders to maps. These maps can be downloaded by right clicking on the image and selecting the option to save. Scatterplots and tables can also be downloaded by using each particular download buttons (tables are not part of the reports, so do not forget downloading them from here if you want to use them later).</p>
+</div>
+<div id="download-a-summary-report" class="section level5">
+<h5>Download a summary report</h5>
+<p>This last tab downloads a report including all produced and visualized results (except for tables, that might be download separatedly in .csv format. Beware that the results that are not visualized will not be included in the report (Shiny apps work by making analyses only when their visualization is required).</p>
+<p>You will find further assistance within each tab.</p>
+</div>
+</div>
+<div id="references" class="section level4 unnumbered">
+<h4>References</h4>
+<div id="refs" class="references">
+<div id="ref-Moss2010">
+<p>Moss, Richard H., Jae A. Edmonds, Kathy A. Hibbard, Martin R. Manning, Steven K. Rose, Detlef P. Van Vuuren, Timothy R. Carter, et al. 2010. “The next generation of scenarios for climate change research and assessment.” <em>Nature</em> 463 (7282): 747–56. <a href="https://doi.org/10.1038/nature08823">https://doi.org/10.1038/nature08823</a>.</p>
+</div>
+<div id="ref-riahi_shared_2017">
+<p>Riahi, Keywan, Detlef P. van Vuuren, Elmar Kriegler, Jae Edmonds, Brian C. O’Neill, Shinichiro Fujimori, Nico Bauer, et al. 2017. “The Shared Socioeconomic Pathways and Their Energy, Land Use, and Greenhouse Gas Emissions Implications: An Overview.” <em>Global Environmental Change</em> 42 (January): 153–68. <a href="https://doi.org/10.1016/j.gloenvcha.2016.05.009">https://doi.org/10.1016/j.gloenvcha.2016.05.009</a>.</p>
+</div>
+<div id="ref-Zappa2017">
+<p>Zappa, Giuseppe, and Theodore G. Shepherd. 2017. “Storylines of Atmospheric Circulation Change for European Regional Climate Impact Assessment.” <em>Journal of Climate</em> 30: 6561–77. <a href="https://doi.org/10.1175/JCLI-D-16-0807.1">https://doi.org/10.1175/JCLI-D-16-0807.1</a>.</p>
+</div>
+</div>
+</div>
+

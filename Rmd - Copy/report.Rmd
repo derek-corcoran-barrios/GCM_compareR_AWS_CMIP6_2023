@@ -1,0 +1,161 @@
+---
+title: "Downloadable report GCM compareR"
+date: "`r format(Sys.time(), '%d/%m, %Y')`"
+output: pdf_document
+params:
+  Year: NA
+  scenario: NA
+  Variables: NA
+  maptype: NA
+  Coords: NA
+  countries: NA
+  biomes: NA
+  ecoregions: NA
+  plot_sc: NA
+  plot_realuns: NA
+  plot_delta: NA
+  plot_uns: NA
+  map_gcm: NA
+  map_delta: NA
+  map_delta_perc: NA
+  map_dif: NA
+  map_dif_perc: NA
+bibliography: biblio.bib
+---
+
+## Introduction
+
+This report was automatically generated with the GCM compareR shiny app.
+
+The app is intended at assisting ecologists, conservationists and policy makers in the process of understanding differences between global circulation models (GCMs) projections on a geographic area, and in the triage of subsets of GCMs for their specific needs. It includes options to perform analyses that assess how different are projections from current climatic conditions and among them.
+
+
+## Note
+
+This report will print "## NULL" when one of the results has not been visualized in the app. Please, make sure that you create all the results before downloading the report if you want to include these figures in your report.
+
+The only results not included here are the tables underlying the scatterplots. This data can be downloaded in .csv format directly from the app using a specific button located on the left panel of the corresponding tab.
+
+## Parameters used for the analysis
+
+The parameters used in the session were:
+
+- Year: `r params$Year`
+
+- Scenario `r params$scenario`. 
+
+- Bioclimatic variables: `r params$Variables`. 
+
+The geografic area was defined using the following settings:
+
+```{r echo = FALSE}
+
+type_selection <- case_when(params$maptype == "map_draw" ~ "rectangle drawing", 
+                            params$maptype == "map_country" ~ "country names", 
+                            params$maptype == "map_biomes" ~ "biome names", 
+                            params$maptype == "map_ecorregions" ~ "ecoregion names", 
+                            params$maptype == "map_bbox" ~ "coordinates box")
+
+# if(!is.na("params$Coords")){
+  print_bbox <- try(paste0(params$Coords, collapse = ", "))
+# }
+
+glue::glue(" - The option {type_selection}")
+
+if(type_selection == "rectangle drawing" | type_selection == "coordinates box"){
+  glue::glue(" - With bounding-box coordinates: {print_bbox}") %>% print()
+}
+if(type_selection == "country names"){
+  glue::glue(" - Country(s) selected: {params$countries}") %>% print()
+  try(glue::glue(" - Cropped to bounding-box: {print_bbox}") %>% print())
+}
+if(type_selection == "biome names"){
+  glue::glue(" - Biome(s) selected: {params$biomes}") %>% print()
+  try(glue::glue(" - Cropped to bounding-box: {print_bbox}") %>% print())
+}
+if(type_selection == "ecoregion names"){
+  glue::glue(" - Ecoregion(s) selected: {params$ecoregions}") %>% print()
+  try(glue::glue(" - Cropped to bounding-box: {print_bbox}") %>% print())
+}
+
+
+```
+
+
+\newpage
+## Results
+
+### Selected GCMs
+
+The following are simply maps of the study area for the selected bioclimatic variables as interpreted by each GCM, also including maps for the baseline (current climatic conditions) and the mean ensemble resulting from the average of values in all selected models. Every layer is plotted using the same color scale, permitting the direct comparison of the projections by each GCM, the mean ensemble and the baseline climate.
+
+```{r, fig.width = 10, fig.height = 10, echo = FALSE}
+params$map_gcm
+```
+
+\newpage
+### Variation from present
+
+The results from comparing GCM projections with current climatic conditions (BASELINE) are presented here. They can be used to identify which GCMs forecast larger or smaller changes in climate (e.g. units of increase in mean annual temperature), to diagnose in which direction are produced those changes (e.g. some models might project an average reduction in annual precipitation and others an increase) and to visualize a spatial pattern in the predicted change.
+
+The next scatterplots show the averaged projected value for two selected bioclimatic variables is plotted for each GCM, the ensemble and the baseline, similarly to the method described in Vano et al. (2015):
+
+- Here, values in the axis of the plot show the average value for each bioclimatic variable:
+
+```{r echo = FALSE}
+params$plot_uns
+```
+
+- In this other figure, values in the axis of the plot show the difference in respect to the baseline of the average value for each bioclimatic variable (so, the indicate change projected in average by each layer):
+
+```{r echo = FALSE}
+params$plot_delta
+```
+
+Lastly, the following maps show the spatial variation of the changes projected by GCMs when compared with the current climate (baseline), also including the average ensemble.
+
+```{r, fig.width = 10, fig.height = 10, echo = FALSE}
+params$map_delta
+```
+
+In addition, the next set of maps show the variation as a percentage relative to the climate of each pixel. In some cases, extreme values in temperature or precipitation in a sector of the study area might make difficult the visualization of large changes in other sectors that naturally have smaller values (e.g. changes in precipitation in an arid region next to a humid mountain will not be easy to detect, because the map's color scale is skewed by the large values of the second sector). This visualization shows the projected changes as a percentage of change with respect to the current conditions.
+
+```{r, fig.width = 10, fig.height = 10, echo = FALSE}
+params$map_delta_perc
+```
+
+
+\newpage
+### Variation among futures
+
+The following results focus on differences within the universe of selected GCMs. As a first step, a mean ensemble climate projection is calculated by averaging the value in each downscaled GCM on a pixel basis. Then, the value in each model is compared to the ensemble, to determine whether its projection is greater or smaller than the average.
+
+The scatterplots are centered on the average ensemble (0, 0 coordinates), and each GCM is plotted using their mean difference to the ensemble values. 
+
+- This first plot is made with scaled values of differences. A circle indicates 2 standard deviations from the ensemble mean.
+
+```{r echo = FALSE}
+params$plot_sc
+```
+
+- To the contrary, differences are not scaled in the following plot. The figure is equivalent to those included in the _Variation from present_ tab, but this one is centered on the ensemble, not in the baseline.
+
+```{r echo = FALSE}
+params$plot_realuns
+```
+
+The maps show now the spatial distribution of each GCM deviations with respect to the average ensemble.
+
+```{r, fig.width = 10, fig.height = 10, echo = FALSE}
+params$map_dif
+```
+
+In addition, the next set of maps show the variation as a percentage relative to the climate of each pixel. In some cases, extreme values in temperature or precipitation in a sector of the study area might make difficult the visualization of large changes in other sectors that naturally have smaller values (e.g. changes in precipitation in an arid region next to a humid mountain will not be easy to detect, because the map's color scale is skewed by the large values of the second sector). This visualization shows the projected changes as a percentage of change with respect to the current conditions.
+
+```{r, fig.width = 10, fig.height = 10, echo = FALSE}
+params$map_dif_perc
+```
+
+
+\newpage
+
