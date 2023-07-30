@@ -13,24 +13,17 @@ library(rgdal)
 library(fasterize)
 library(maps)
 library(maptools)
+library(terra)
 
 # Spatial data
-world <- maps::map("world", fill = TRUE, plot = FALSE)
-world_map <- map2SpatialPolygons(world, sub(":.*$", "", world$names))
-world_map <- SpatialPolygonsDataFrame(world_map,
-                                      data.frame(country = names(world_map), 
-                                                 stringsAsFactors = FALSE), 
-                                      FALSE)
-world_sf <- st_as_sf(world_map)
-biomes <- read_sf("data/biomes.shp")
-biomes_sp <- readOGR("data", "biomes")
-ecorregions <- read_sf("data/Ecoregions2017.shp")
-ecorregions_sp <- readOGR("data", "Ecoregions2017")
+world_sf <- terra::vect("data/world_map.shp")
+biomes <- terra::vect("data/biomes.shp")
+ecorregions <- terra::vect("data/Ecoregions2017.shp")
 
 
 # Table of available GCMs
-table_GCMs_CMIP6 <- read_csv("data/GCMs_details_CMIP6.csv")
-table_GCMs_CMIP5 <- read_csv("data/GCMs_details_CMIP5.csv") %>% 
+table_GCMs_CMIP6 <- readr::read_csv("data/GCMs_details_CMIP6.csv")
+table_GCMs_CMIP5 <- readr::read_csv("data/GCMs_details_CMIP5.csv") |>  
   dplyr::select(-"Actual name")
 
 
@@ -40,7 +33,7 @@ table_GCMs_CMIP5 <- read_csv("data/GCMs_details_CMIP5.csv") %>%
 
 
 # Initialize object to store reactive values
-rvs <- reactiveValues(ext_user = extent(-180, 180, -60, 90),
+rvs <- shiny::reactiveValues(ext_user = terra::ext(-180, 180, -60, 90),
                       still_no_analyse = NULL,
                       available_gcms = NULL)
 # To debbug
@@ -56,19 +49,19 @@ server <- function(input, output) {
   # #### Prepare input values and hide options
   # ##################################################
   # ### Asure that hidden input provide a valid initial value
-  output$sel_gcms <- eventReactive(input$sel_gcms, TRUE, ignoreInit = TRUE)
-  output$bio_vars <- eventReactive(input$bio_vars, TRUE, ignoreInit = TRUE)
-  output$selection_gcms <- eventReactive(input$selection_gcms, TRUE, ignoreInit = TRUE)
-  output$res_sel <- eventReactive(input$res_sel, TRUE, ignoreInit = TRUE)
-  output$year_type <- eventReactive(input$year_type, TRUE, ignoreInit = TRUE)
-  output$scenario_type <- eventReactive(input$scenario_type, TRUE, ignoreInit = TRUE)
-  output$compare_type <- eventReactive(input$compare_type, TRUE, ignoreInit = TRUE)
-  output$compare_type_bio_bio <- eventReactive(input$compare_type_bio_bio, TRUE, ignoreInit = TRUE)
-  output$compare_type_bio_several <- eventReactive(input$compare_type_bio_several, TRUE, ignoreInit = TRUE)
-  output$gcm_to_plot <- eventReactive(input$gcm_to_plot, TRUE, ignoreInit = TRUE)
-  output$bio_to_plot <- eventReactive(input$bio_to_plot, TRUE, ignoreInit = TRUE)
-  output$map_pre_delta_gcm <- eventReactive(input$map_pre_delta_gcm, TRUE, ignoreInit = TRUE)
-  output$map_pre_delta_bio <- eventReactive(input$map_pre_delta_bio, TRUE, ignoreInit = TRUE)
+  output$sel_gcms <- shiny::eventReactive(input$sel_gcms, TRUE, ignoreInit = TRUE)
+  output$bio_vars <- shiny::eventReactive(input$bio_vars, TRUE, ignoreInit = TRUE)
+  output$selection_gcms <- shiny::eventReactive(input$selection_gcms, TRUE, ignoreInit = TRUE)
+  output$res_sel <- shiny::eventReactive(input$res_sel, TRUE, ignoreInit = TRUE)
+  output$year_type <- shiny::eventReactive(input$year_type, TRUE, ignoreInit = TRUE)
+  output$scenario_type <- shiny::eventReactive(input$scenario_type, TRUE, ignoreInit = TRUE)
+  output$compare_type <- shiny::eventReactive(input$compare_type, TRUE, ignoreInit = TRUE)
+  output$compare_type_bio_bio <- shiny::eventReactive(input$compare_type_bio_bio, TRUE, ignoreInit = TRUE)
+  output$compare_type_bio_several <- shiny::eventReactive(input$compare_type_bio_several, TRUE, ignoreInit = TRUE)
+  output$gcm_to_plot <- shiny::eventReactive(input$gcm_to_plot, TRUE, ignoreInit = TRUE)
+  output$bio_to_plot <- shiny::eventReactive(input$bio_to_plot, TRUE, ignoreInit = TRUE)
+  output$map_pre_delta_gcm <- shiny::eventReactive(input$map_pre_delta_gcm, TRUE, ignoreInit = TRUE)
+  output$map_pre_delta_bio <-shiny:: eventReactive(input$map_pre_delta_bio, TRUE, ignoreInit = TRUE)
   
   outputOptions(output, "sel_gcms", suspendWhenHidden = FALSE)   # The key is suspendWhenHidden = FALSE
   outputOptions(output, "bio_vars", suspendWhenHidden = FALSE)
@@ -459,7 +452,7 @@ server <- function(input, output) {
   #### MAP      
   ### Leaflet interactive map
   # create map
-  m <- leaflet(world_sf) %>% 
+  m <- leaflet(sf::st_as_sf(world_sf)) %>% 
     addTiles() %>%
     addProviderTiles("Esri.WorldPhysical", group = "Relieve") %>%
     addTiles(options = providerTileOptions(noWrap = TRUE), group = "Countries") %>%
@@ -500,7 +493,7 @@ server <- function(input, output) {
       coords <- unlist(input$map_draw_new_feature$geometry$coordinates)
       xy <- matrix(c(coords[c(TRUE,FALSE)], coords[c(FALSE,TRUE)]), ncol = 2) %>% 
         unique %>% 
-        extent
+        terra::ext()
       rvs$polySelXY <- xy
       rvs$saved_bbox <- xy
     }
@@ -534,7 +527,7 @@ server <- function(input, output) {
                       fillColor = "#1ebea6",
                       color = "#158b7a")
       
-      rvs$polySelXY <- extent(input$xmin,
+      rvs$polySelXY <- terra::ext(input$xmin,
                               input$xmax,
                               input$ymin,
                               input$ymax)
@@ -546,10 +539,8 @@ server <- function(input, output) {
     if (input$extent_type == "map_country"){
       
       # Country names manually added - subset layer to overlay
-      selected_countries <- world_sf %>%
-        filter(country %in% input$ext_name_country)
+      selected_countries <- world_sf[world_sf$country %in% input$ext_name_country,]
       
-      # Add polygons to leaflet
       map %>% 
         clearGroup("draw") %>%
         clearGroup("bbox") %>% 
@@ -566,13 +557,13 @@ server <- function(input, output) {
         hideGroup("ecorregionsSel") %>% 
         showGroup("countrySel") %>% 
         showGroup("country") %>% 
-        addPolygons(data = world_sf, 
+        addPolygons(data = sf::st_as_sf(world_sf), 
                     group = "country",
                     weight = 1,
                     fillOpacity = 0,
                     opacity = 0.5,
                     color = "#595959") %>% 
-        addPolygons(data = selected_countries, 
+        addPolygons(data = sf::st_as_sf(selected_countries), 
                     group = "countrySel",
                     weight = 1,
                     fillColor = "#8e113f",
@@ -587,11 +578,11 @@ server <- function(input, output) {
       coords <- unlist(input$map_draw_new_feature$geometry$coordinates)
       xy <- matrix(c(coords[c(TRUE,FALSE)], coords[c(FALSE,TRUE)]), ncol = 2) %>% 
         unique %>% 
-        extent
+        terra::ext()
       
       glue::glue("#>   Crop Countries to EXTENT {xy}") %>% message
       selected_countries <- selected_countries %>% 
-        st_crop(xmin = xmin(xy), xmax = xmax(xy), ymin = ymin(xy), ymax = ymax(xy))
+        terra::crop(xy)
       
       rvs$saved_bbox <- c(xmin(xy), xmax(xy), ymin(xy), ymax(xy))
       rvs$polySelXY <- selected_countries
@@ -600,8 +591,7 @@ server <- function(input, output) {
     # Countries selected by biome name
     if (input$extent_type == "map_biomes"){
       
-      selected_biomes <- biomes %>%
-        filter(BIOME_NAME %in% input$ext_name_biomes)
+      selected_biomes <- biomes[biomes$BIOME_NAME %in% input$ext_name_biomes]
       
       # Add polygons to leaflet
       map %>% 
@@ -640,7 +630,7 @@ server <- function(input, output) {
       coords <- unlist(input$map_draw_new_feature$geometry$coordinates)
       xy <- matrix(c(coords[c(TRUE,FALSE)], coords[c(FALSE,TRUE)]), ncol = 2) %>% 
         unique %>% 
-        extent
+        terra::ext()
       
       glue::glue("#>   Crop biomes EXTENT {xy}") %>% message
       selected_biomes <- selected_biomes %>% 
@@ -689,7 +679,7 @@ server <- function(input, output) {
       coords <- unlist(input$map_draw_new_feature$geometry$coordinates)
       xy <- matrix(c(coords[c(TRUE,FALSE)], coords[c(FALSE,TRUE)]), ncol = 2) %>% 
         unique %>% 
-        extent
+        terra::ext()
       
       glue::glue("#>   Crop ecorregions EXTENT {xy}") %>% message
       selected_ecorregions <- selected_ecorregions %>% 
@@ -938,10 +928,10 @@ server <- function(input, output) {
                          mutate(id = 1) %>% group_by(id) %>% summarise
                        rvs$polySelXY_r <- fasterize::fasterize(rvs$polySelXY,
                                                                rvs$clim_vars[[1]][[1]] %>%
-                                                                 raster::crop(extent(xmin(extent(rvs$polySelXY)),
-                                                                                     xmax(extent(rvs$polySelXY)),
-                                                                                     ymin(extent(rvs$polySelXY)),
-                                                                                     ymax(extent(rvs$polySelXY)))))
+                                                                 raster::crop(terra::ext(terra::xmin(terra::ext(rvs$polySelXY)),
+                                                                                     xmax(terra::ext(rvs$polySelXY)),
+                                                                                     ymin(terra::ext(rvs$polySelXY)),
+                                                                                     ymax(terra::ext(rvs$polySelXY)))))
                        
                        glue::glue("#     - Masking") %>% message
                        rvs$clim_vars <- rvs$clim_vars %>%
