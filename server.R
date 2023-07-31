@@ -607,7 +607,7 @@ server <- function(input, output) {
         clearGroup("biomesSel") %>% 
         showGroup("biomesSel") %>% 
         showGroup("biomes") %>% 
-        addPolygons(data = biomes,
+        addPolygons(data = sf::st_as_sf(biomes),
                     group = "biomes",
                     weight = 1,
                     fillOpacity = 0,
@@ -615,7 +615,7 @@ server <- function(input, output) {
                     # smoothFactor = 3,
                     color = "#595959") %>% 
         # Highlight selected biomes
-        addPolygons(data = selected_biomes, 
+        addPolygons(data = sf::st_as_sf(selected_biomes), 
                     group = "biomesSel",
                     weight = 1,
                     fillColor = "#8e113f",
@@ -634,7 +634,7 @@ server <- function(input, output) {
       
       glue::glue("#>   Crop biomes EXTENT {xy}") %>% message
       selected_biomes <- selected_biomes %>% 
-        st_crop(xmin = xmin(xy), xmax = xmax(xy), ymin = ymin(xy), ymax = ymax(xy))
+        terra::crop(xy)
       
       rvs$saved_bbox <- c(xmin(xy), xmax(xy), ymin(xy), ymax(xy))
       rvs$polySelXY <- selected_biomes
@@ -643,8 +643,7 @@ server <- function(input, output) {
     # Countries selected by ecorregion name
     if (input$extent_type == "map_ecorregions"){
       
-      selected_ecorregions <- ecorregions %>%
-        filter(ECO_NAME %in% input$ext_name_ecorregions)
+      selected_ecorregions <- ecorregions[ecorregions$ECO_NAME %in% input$ext_name_ecorregions]
       
       # Add polygons to leaflet
       map %>% 
@@ -664,7 +663,7 @@ server <- function(input, output) {
                     # smoothFactor = 3,
                     color = "#595959") %>% 
         # Highlight selected ecorregions
-        addPolygons(data = selected_ecorregions, 
+        addPolygons(data = sf::st_as_sf(selected_ecorregions), 
                     group = "ecorregionsSel",
                     weight = 1,
                     fillColor = "#8e113f",
@@ -683,7 +682,7 @@ server <- function(input, output) {
       
       glue::glue("#>   Crop ecorregions EXTENT {xy}") %>% message
       selected_ecorregions <- selected_ecorregions %>% 
-        st_crop(xmin = xmin(xy), xmax = xmax(xy), ymin = ymin(xy), ymax = ymax(xy))
+        terra::crop(xy)
       
       rvs$saved_bbox <- c(xmin(xy), xmax(xy), ymin(xy), ymax(xy))
       rvs$polySelXY <- selected_ecorregions
@@ -827,7 +826,7 @@ server <- function(input, output) {
                          purrr::map(~list.files(paste0("clim_data/worldclimCMIP6/", .x),
                                                 pattern = ".tif",
                                                 full.names = T)) %>%
-                         purrr::map(~ raster::stack(.x))
+                         purrr::map(~ terra::rast(.x))
                        
                        clim_vars_files <- clim_vars_files %>%
                          purrr::map(~setNames(.x, names(.x) %>% gsub(".*\\.bio","",.) %>% paste0("bio",.)))
@@ -845,7 +844,7 @@ server <- function(input, output) {
                          purrr::map(~list.files(paste0("clim_data/worldclimCMIP5/", .x),
                                                 pattern = ".tif",
                                                 full.names = T)) %>%
-                         purrr::map(~ raster::stack(.x))
+                         purrr::map(~ terra::rast(.x))
                        clim_vars_files <- clim_vars_files %>%
                          purrr::map(~setNames(.x, names(.x) %>% gsub(".*\\.bio","",.) %>% paste0("bio",.)))
                        
@@ -867,7 +866,7 @@ server <- function(input, output) {
                          purrr::map(~list.files(paste0("clim_data/worldclimCMIP6/", .x),
                                                 pattern = ".tif",
                                                 full.names = T)) %>%
-                         purrr::map(~ raster::stack(.x))
+                         purrr::map(~ terra::rast(.x))
                        clim_vars_files <- clim_vars_files %>%
                          purrr::map(~setNames(.x, names(.x) %>% gsub(".*\\.bio","",.) %>% paste0("bio",.)))
                        
@@ -885,7 +884,7 @@ server <- function(input, output) {
                          purrr::map(~list.files(paste0("clim_data/worldclimCMIP5/", .x),
                                                 pattern = ".tif",
                                                 full.names = T)) %>%
-                         purrr::map(~ raster::stack(.x))
+                         purrr::map(~ terra::rast(.x))
                        clim_vars_files <- clim_vars_files %>%
                          purrr::map(~setNames(.x, names(.x) %>% gsub(".*\\.bio","",.) %>% paste0("bio",.)))
                        
@@ -902,7 +901,7 @@ server <- function(input, output) {
                    incProgress(amount = 0.1, message = "Dropping unnecessary layers")
                    glue::glue("#>>   Subsetting selected variables") %>% message
                    rvs$clim_vars <- rvs$clim_vars_complete %>%
-                     purrr::map(~ raster::subset(.x, subset = c(rvs$bio_vars_x2, rvs$bio_vars_y2)))
+                     purrr::map(~ terra::subset(.x, subset = c(rvs$bio_vars_x2, rvs$bio_vars_y2)))
                    
                    # Crop to study area
                    incProgress(amount = 0.1, message = "Cropping to study area")
@@ -915,11 +914,11 @@ server <- function(input, output) {
                      ## When it is not a polygon
                      if (!is(rvs$polySelXY, "sf")){
                        rvs$clim_vars <- rvs$clim_vars %>%
-                         purrr::map(~ raster::crop(.x, rvs$polySelXY))
+                         purrr::map(~ terra::crop(.x, rvs$polySelXY))
                        
                        # Save a copy of croped countries
                        rvs$sf_country <- world_sf %>% 
-                         st_crop(xmin = xmin(rvs$polySelXY), xmax = xmax(rvs$polySelXY), ymin = ymin(rvs$polySelXY), ymax = ymax(rvs$polySelXY))
+                         terra::crop(rvs$polySelXY)
                      }
                      ## When it is a polygon
                      if (is(rvs$polySelXY, "sf")){
