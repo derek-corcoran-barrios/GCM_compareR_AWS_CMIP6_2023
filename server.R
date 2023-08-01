@@ -1095,7 +1095,7 @@ server <- function(input, output) {
                    for (v in names(rvs$clim_vars[[1]])){
                      temp_table <- rvs$clim_vars %>%
                        purrr::map(~ .x[[v]]) %>%
-                       purrr::map_dfc(~ raster::values(.x)) %>% t() %>% 
+                       purrr::map_dfc(~ terra::values(.x)) %>% t() %>% 
                        scale()
                      temp_table <- temp_table %>%
                        as.data.frame() %>%
@@ -1142,7 +1142,7 @@ server <- function(input, output) {
                    for (v in names(rvs$clim_diff[[1]])){
                      temp_table <- rvs$clim_diff %>%
                        purrr::map(~ .x[[v]]) %>%
-                       purrr::map_dfc(~ raster::values(.x)) %>% t()
+                       purrr::map_dfc(~ terra::values(.x)) %>% t()
                      temp_table <- temp_table %>%
                        as.data.frame() %>%
                        tibble::rownames_to_column("GCM") %>%
@@ -1580,18 +1580,18 @@ server <- function(input, output) {
         for (b in names(rvs$clim_vars[[1]])){
           # Combine all variables to plot
           scenario_data <- rvs$clim_vars %>%
-            purrr::map(~ raster::subset(.x, b)) %>%
-            raster::stack()
+            purrr::map(~ terra::subset(.x, b)) %>%
+            purrr::reduce(c)
           
           scenario_data <- rvs$clim_ens %>%
-            raster::subset(., b) %>%
+            terra::subset(., b) %>%
             setNames("ENSEMBLE") %>%
-            stack(scenario_data)
+            c(scenario_data)
           
           scenario_data <- rvs$clim_baseline %>%
-            raster::subset(., b) %>%
+            terra::subset(., b) %>%
             setNames("BASELINE") %>%
-            stack(scenario_data)
+            c(scenario_data)
           
           long_name <- case_when(b == "bio1" ~ "Annual Mean Temperature (bio 1, °C) ",
                                  b == "bio2" ~ "Mean Diurnal Range (Mean of monthly (bio 2, °C))",
@@ -1697,8 +1697,8 @@ server <- function(input, output) {
         
         # Combine all variables to plot
         scenario_data <- rvs$clim_delta %>%
-          purrr::map(~ raster::subset(.x, b)) %>%
-          raster::stack()
+          purrr::map(~ terra::subset(.x, b)) %>%
+          purrr::reduce(c)
         
         # scenario_data <- rvs$clim_baseline %>%
         #   raster::subset(., b) %>%
@@ -1922,8 +1922,8 @@ server <- function(input, output) {
       for (b in names(rvs$clim_diff[[1]])){
         # Load layers
         scenario_data <- rvs$clim_diff %>%
-          purrr::map(~ raster::subset(.x, b)) %>%
-          raster::stack()
+          purrr::map(~ terra::subset(.x, b)) %>%
+          purrr::reduce(c)
         
         long_name <- case_when(b == "bio1" ~ "Annual Mean Temperature (bio 1, °C) ",
                                b == "bio2" ~ "Mean Diurnal Range (Mean of monthly (bio 2, °C))",

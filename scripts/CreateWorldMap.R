@@ -10,4 +10,6 @@ world_map <- SpatialPolygonsDataFrame(world_map,
                                       FALSE)
 
 world_map <- terra::vect(world_map)
-writeVector(world_map, "data/world_map.shp")
+
+crs(world_map)  <- "epsg:4326"
+writeVector(world_map, "data/world_map.shp", overwrite=TRUE)
