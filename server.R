@@ -912,7 +912,7 @@ server <- function(input, output) {
                    if(!is.null(rvs$polySelXY)){
                      glue::glue("#>>   Cropping to study area") %>% message
                      ## When it is not a polygon
-                     if (!is(rvs$polySelXY, "sf")){
+                     if (!is(rvs$polySelXY, "SpatVector")){
                        rvs$clim_vars <- rvs$clim_vars %>%
                          purrr::map(~ terra::crop(.x, rvs$polySelXY))
                        
@@ -921,21 +921,11 @@ server <- function(input, output) {
                          terra::crop(rvs$polySelXY)
                      }
                      ## When it is a polygon
-                     if (is(rvs$polySelXY, "sf")){
-                       glue::glue("#     - Rasterizing polygon") %>% message
-                       rvs$polySelXY <- rvs$polySelXY %>% 
-                         mutate(id = 1) %>% group_by(id) %>% summarise
-                       rvs$polySelXY_r <- fasterize::fasterize(rvs$polySelXY,
-                                                               rvs$clim_vars[[1]][[1]] %>%
-                                                                 raster::crop(terra::ext(terra::xmin(terra::ext(rvs$polySelXY)),
-                                                                                     xmax(terra::ext(rvs$polySelXY)),
-                                                                                     ymin(terra::ext(rvs$polySelXY)),
-                                                                                     ymax(terra::ext(rvs$polySelXY)))))
-                       
+                     if (is(rvs$polySelXY, "SpatVector")){
                        glue::glue("#     - Masking") %>% message
                        rvs$clim_vars <- rvs$clim_vars %>%
-                         purrr::map(~ raster::crop(.x, rvs$polySelXY_r)) %>%
-                         purrr::map(~ raster::mask(.x, rvs$polySelXY_r))
+                         purrr::map(~ terra::crop(.x, rvs$polySelXY)) %>%
+                         purrr::map(~ terra::mask(.x, rvs$polySelXY))
                        
                        # Save a copy of croped countries
                        rvs$sf_country <- rvs$polySelXY
@@ -971,14 +961,14 @@ server <- function(input, output) {
                    if(input$cmip == "cmip6"){
                      rvs$clim_baseline_complete <- paste0("clim_data/worldclimCMIP6/wc2.1_", input$res_sel) %>% 
                        list.files(full.names = T, pattern = ".tif") %>% 
-                       stack %>% 
+                       terra::rast() %>% 
                        setNames(names(.) %>% gsub(".*_bio","bio",.))
                    }
                    
                    if(input$cmip == "cmip5"){
                      rvs$clim_baseline_complete <- paste0("clim_data/worldclimCMIP5/wc1.4_", input$res_sel) %>% 
                        list.files(full.names = T, pattern = ".tif") %>% 
-                       stack %>% 
+                       terra::rast() %>% 
                        setNames(names(.) %>% gsub(".*_bio","bio",.))
                    }
                    
@@ -988,11 +978,11 @@ server <- function(input, output) {
                    
                    glue::glue("#>>   Subsetting bioclims in baseline") %>% message
                    rvs$clim_baseline <- rvs$clim_baseline_complete %>% 
-                     raster::subset(c(rvs$bio_vars_x2, rvs$bio_vars_y2))
+                     terra::subset(c(rvs$bio_vars_x2, rvs$bio_vars_y2))
                    
                    rvs$clim_baseline <- rvs$clim_baseline %>% 
-                     crop(extent(rvs$clim_vars[[1]])) %>% 
-                     mask(rvs$clim_vars[[1]][[1]])
+                     terra::crop(extent(rvs$clim_vars[[1]])) %>% 
+                     terra::mask(rvs$clim_vars[[1]][[1]])
                    
                    # Divide by 10 certain variables - not necessary in WC2.0
                    if(input$cmip == "cmip5"){
@@ -1017,7 +1007,7 @@ server <- function(input, output) {
                    glue::glue("#>>   Calculating the ensemble from all different GCM projections") %>% message
                    rvs$clim_ens <- rvs$clim_vars %>%
                      purrr::reduce(`+`) %>%                                  # Sum all layers
-                     raster::calc(fun = function(x){x / length(rvs$clim_vars)})  # Divide by the number of layers
+                     terra::app(fun = function(x){x / length(rvs$clim_vars)})  # Divide by the number of layers
                    rvs$clim_delta_ensemble <- rvs$clim_ens - rvs$clim_baseline
                    
                    ### Compare each GCM with the ensemble
