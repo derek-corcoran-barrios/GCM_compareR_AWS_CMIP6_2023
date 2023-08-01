@@ -1095,27 +1095,8 @@ server <- function(input, output) {
                      purrr::map(~rownames_to_column(.x, var = "variable")) |> 
                      purrr::map2(names(rvs$clim_vars_scaled), ~mutate(.x, GCM = .y)) |> 
                      purrr::reduce(bind_rows) |> 
-                     tidyr::pivot_wider(names_from = "variable", values_from = "mean") %>%
-                     mutate(Distance = sqrt(.data[[rvs$bio_vars_x2]]^2 + .data[[rvs$bio_vars_y2]]^2)) |>   
-                     dplyr::arrange(Distance)
-                   
-                   table_diff_scaled <- list()
-                   for (v in names(rvs$clim_vars[[1]])){
-                     temp_table <- rvs$clim_vars %>%
-                       purrr::map(~ .x[[v]]) %>%
-                       purrr::map_dfc(~ terra::values(.x)) %>% t() %>% 
-                       scale()
-                     temp_table <- temp_table %>%
-                       as.data.frame() %>%
-                       tibble::rownames_to_column("GCM") %>%
-                       tibble::as_tibble()
-                     table_diff_scaled[[length(table_diff_scaled) + 1]] <- temp_table
-                     names(table_diff_scaled)[length(table_diff_scaled)] <- v
-                   }
-                   # Calculare means for each GCM and combine in one unique table
-                   table_diff_scaled <- table_diff_scaled %>%
-                     purrr::map_dfc(~ rowMeans(.x[,2:ncol(.x)], na.rm = T)) %>%
-                     dplyr::bind_cols(table_diff_scaled[[1]][,1])
+                     tidyr::pivot_wider(names_from = "variable", values_from = "mean")            
+
                    # Combine temperature and precipitation variables separatedly
                    table_scaled <- tibble::tibble(GCM = table_diff_scaled %>%
                                                     dplyr::select(GCM) %>% dplyr::pull(GCM),
@@ -1146,22 +1127,13 @@ server <- function(input, output) {
                    circle <- circleFun(center = c(0,0), diameter = std_error * 2, npoints = 300)
                    
                    ##############################  Real unscaled  ##############################
-                   table_diff_realunscaled <- list()
-                   for (v in names(rvs$clim_diff[[1]])){
-                     temp_table <- rvs$clim_diff %>%
-                       purrr::map(~ .x[[v]]) %>%
-                       purrr::map_dfc(~ terra::values(.x)) %>% t()
-                     temp_table <- temp_table %>%
-                       as.data.frame() %>%
-                       tibble::rownames_to_column("GCM") %>%
-                       tibble::as_tibble()
-                     table_diff_realunscaled[[length(table_diff_realunscaled) + 1]] <- temp_table
-                     names(table_diff_realunscaled)[length(table_diff_realunscaled)] <- v
-                   }
-                   # Calculare means for each GCM and combine in one unique table
-                   table_diff_realunscaled <- table_diff_realunscaled %>%
-                     purrr::map_dfc(~ rowMeans(.x[,2:ncol(.x)], na.rm = T)) %>%
-                     dplyr::bind_cols(table_diff_realunscaled[[1]][,1])
+                   table_diff_realunscaled <- rvs$clim_vars |> 
+                     purrr::map(~global(.x, "mean", na.rm = T)) |> 
+                     purrr::map(~rownames_to_column(.x, var = "variable")) |> 
+                     purrr::map2(names(rvs$clim_vars), ~mutate(.x, GCM = .y)) |> 
+                     purrr::reduce(bind_rows) |> 
+                     tidyr::pivot_wider(names_from = "variable", values_from = "mean")
+
                    # Combine temperature and precipitation variables separatedly
                    table_realunscaled <- tibble::tibble(GCM = table_diff_realunscaled %>%
                                                           dplyr::select(GCM) %>% dplyr::pull(GCM),
