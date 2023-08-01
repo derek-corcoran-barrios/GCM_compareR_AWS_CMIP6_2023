@@ -981,7 +981,7 @@ server <- function(input, output) {
                      terra::subset(c(rvs$bio_vars_x2, rvs$bio_vars_y2))
                    
                    rvs$clim_baseline <- rvs$clim_baseline %>% 
-                     terra::crop(extent(rvs$clim_vars[[1]])) %>% 
+                     terra::crop(terra::ext(rvs$clim_vars[[1]])) %>% 
                      terra::mask(rvs$clim_vars[[1]][[1]])
                    
                    # Divide by 10 certain variables - not necessary in WC2.0
