@@ -29,11 +29,6 @@ DF <- data.frame(Names = Names, path = TestFiles) |>
 
 denmark <- world_sf[world_sf$country == "Denmark",]
 
-TestResult <-DF[[1]]$path |> 
-  terra::rast() |> 
-  terra::crop(denmark) |> 
-  terra::mask(denmark) |> 
-  magrittr::set_names(DF[[1]]$Biovar)
 
 TestResult <-DF |> purrr::map(~dplyr::pull(.x, path)) |> 
   purrr::map(terra::rast) |> 

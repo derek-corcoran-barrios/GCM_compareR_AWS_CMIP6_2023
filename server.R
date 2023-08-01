@@ -7,12 +7,7 @@ library(leaflet)
 library(leaflet.extras)
 library(ggrepel)
 # Maps
-library(sp)
 library(sf)
-library(rgdal)
-library(fasterize)
-library(maps)
-library(maptools)
 library(terra)
 
 # Spatial data
@@ -812,7 +807,7 @@ server <- function(input, output) {
                    # For debugging
                    # input$scenario_type <- "ssp245"
                    # input$year_type <- "2081-2100"
-                   
+                   # input$sel_gcms <- c("ACCESS.CM2","ACCESS.ESM1.5", "AWI.CM.1.1.MR", "CanESM5", "CanESM5.CanOE") 
                    if(!is.null(input$sel_gcms)){
                      
                      # Load .tif data
@@ -1006,8 +1001,8 @@ server <- function(input, output) {
                    incProgress(amount = 0.3, message = "Calculating mean ensemble")
                    glue::glue("#>>   Calculating the ensemble from all different GCM projections") %>% message
                    rvs$clim_ens <- rvs$clim_vars %>%
-                     purrr::reduce(`+`) %>%                                  # Sum all layers
-                     terra::app(fun = function(x){x / length(rvs$clim_vars)})  # Divide by the number of layers
+                     purrr::reduce(c) %>%                                  # Sum all layers
+                     terra::tapp(names(rvs$clim_vars[[1]]), mean)  # Divide by the number of layers
                    rvs$clim_delta_ensemble <- rvs$clim_ens - rvs$clim_baseline
                    
                    ### Compare each GCM with the ensemble
@@ -1091,6 +1086,19 @@ server <- function(input, output) {
                    glue::glue("#   Creating table of differences") %>% message()
                    
                    ##############################  Scaled  ##############################
+                   rvs$SD_clim <- tapp(purrr::reduce(rvs$clim_vars, c), names(rvs$clim_vars[[1]]), sd)
+                   rvs$clim_vars_scaled <- rvs$clim_vars |> 
+                     purrr::map(~((.x - rvs$clim_ens)/rvs$SD_clim))
+                   
+                   table_diff_scaled <- rvs$clim_vars_scaled |> 
+                     purrr::map(~global(.x, "mean", na.rm = T)) |> 
+                     purrr::map(~rownames_to_column(.x, var = "variable")) |> 
+                     purrr::map2(names(rvs$clim_vars_scaled), ~mutate(.x, GCM = .y)) |> 
+                     purrr::reduce(bind_rows) |> 
+                     tidyr::pivot_wider(names_from = "variable", values_from = "mean") %>%
+                     mutate(Distance = sqrt(.data[[rvs$bio_vars_x2]]^2 + .data[[rvs$bio_vars_y2]]^2)) |>   
+                     dplyr::arrange(Distance)
+                   
                    table_diff_scaled <- list()
                    for (v in names(rvs$clim_vars[[1]])){
                      temp_table <- rvs$clim_vars %>%
