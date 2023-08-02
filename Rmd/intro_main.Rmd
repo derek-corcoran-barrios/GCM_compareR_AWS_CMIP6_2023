@@ -11,7 +11,7 @@ bibliography: biblio.bib
 
 #### Lastest news
 
-> - **GCM compareR has been updated to use terra instead of raster (Aug 2023)**
+> - **GCM compareR has been updated to use terra instead of raster (Aug 2023) making it 4 times faster**
 
 > - GCM compareR has been updated to incorporate data from CMIP6 (Sep 2020)
 
