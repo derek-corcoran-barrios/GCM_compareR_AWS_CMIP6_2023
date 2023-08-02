@@ -6,6 +6,7 @@ library(plotly)
 library(leaflet)
 library(leaflet.extras)
 library(ggrepel)
+library(tidyterra)
 # Maps
 library(sf)
 library(terra)
@@ -1544,7 +1545,8 @@ server <- function(input, output) {
           # Combine all variables to plot
           scenario_data <- rvs$clim_vars %>%
             purrr::map(~ terra::subset(.x, b)) %>%
-            purrr::reduce(c)
+            purrr::reduce(c) %>%
+            magrittr::set_names(names(rvs$clim_vars))
           
           scenario_data <- rvs$clim_ens %>%
             terra::subset(., b) %>%
@@ -1576,44 +1578,29 @@ server <- function(input, output) {
                                  b == "bio18" ~ "Precipitation of Warmest Quarter (bio 18, mm)",
                                  b == "bio19" ~ "Precipitation of Coldest Quarter (bio 19, mm)")
           
-          # Get range of values
-          range_values <- c(min(values(scenario_data), na.rm = T),
-                            max(values(scenario_data), na.rm = T))
-          range_by <- (range_values[2] - range_values[1]) / 100
-          
+
           # Plot
-          scenario_plot <- scenario_data %>%
-            rasterVis::levelplot(main = paste0(long_name, " - Unmodified GCMs"),
-                                 # layout = lp_layout,
-                                 at = seq(range_values[[1]],
-                                          range_values[[2]],
-                                          by = range_by))
+          scenario_plot <- ggplot() + 
+            tidyterra::geom_spatraster(data = scenario_data) + facet_wrap(~lyr) + tidyterra::scale_fill_wiki_c(name = "") + theme_bw()+
+            scale_x_continuous(n.breaks=3, guide = guide_axis(check.overlap = TRUE)) +
+            labs(title = paste0(long_name, " - Unmodified GCMs")) +
+            theme(axis.text.x = element_blank(), axis.text.y = element_blank()) 
           if (input$add_layer == "countries"){
-            sp_add <- world_map %>% crop(extent(rvs$clim_vars[[1]]))
+            sp_add <- world_sf %>% terra::crop(rvs$clim_vars[[1]])
             scenario_plot <- scenario_plot +
-              latticeExtra::layer(sp::sp.polygons(sp_add,
-                                                  lwd = 1.5,
-                                                  alpha = 0.7,
-                                                  col = "black"),
-                                  data = list(sp_add = sp_add))
+              tidyterra::geom_spatvector(data = sp_add, alpha = 0)
           }
           if (input$add_layer == "biomes"){
-            sp_add <- biomes_sp %>% crop(extent(rvs$clim_vars[[1]]))
+            sp_add <- biomes %>% terra::crop(rvs$clim_vars[[1]])
             scenario_plot <- scenario_plot +
-              latticeExtra::layer(sp::sp.polygons(sp_add,
-                                                  lwd = 1.5,
-                                                  alpha = 0.7,
-                                                  col = "black"),
-                                  data = list(sp_add = sp_add))
+              tidyterra::geom_spatvector(data = sp_add, alpha = 0)
+            
           }
           if (input$add_layer == "ecoregions"){
-            sp_add <- ecorregions_sp %>% crop(extent(rvs$clim_vars[[1]]))
+          
+            sp_add <- ecorregions %>% terra::crop(rvs$clim_vars[[1]])
             scenario_plot <- scenario_plot +
-              latticeExtra::layer(sp::sp.polygons(sp_add,
-                                                  lwd = 1.5,
-                                                  alpha = 0.7,
-                                                  col = "black"),
-                                  data = list(sp_add = sp_add))
+              tidyterra::geom_spatvector(data = sp_add, alpha = 0)
           }
           
           plot_gcm_pattern[[length(plot_gcm_pattern) + 1]] <- scenario_plot
@@ -1661,7 +1648,8 @@ server <- function(input, output) {
         # Combine all variables to plot
         scenario_data <- rvs$clim_delta %>%
           purrr::map(~ terra::subset(.x, b)) %>%
-          purrr::reduce(c)
+          purrr::reduce(c) %>%
+          magrittr::set_names(names(rvs$clim_delta))
         
         # scenario_data <- rvs$clim_baseline %>%
         #   raster::subset(., b) %>%
@@ -1688,47 +1676,32 @@ server <- function(input, output) {
                                b == "bio18" ~ "Precipitation of Warmest Quarter (bio 18, mm)",
                                b == "bio19" ~ "Precipitation of Coldest Quarter (bio 19, mm)")
         
-        # Get range of values
-        range_values <- c(min(values(scenario_data), na.rm = T),
-                          max(values(scenario_data), na.rm = T))
-        range_values <- c(- max(abs(range_values)), max(abs(range_values)))
-        range_by <- (range_values[2] - range_values[1]) / 100
         
         # Plot
-        scenario_plot <- scenario_data %>%
-          rasterVis::levelplot(main = paste0(long_name, " - Variation from current climate"),
-                               par.settings = rasterVis::RdBuTheme(region = rev(RColorBrewer::brewer.pal(9, 'RdGy'))),
-                               # layout = lp_layout,
-                               at = seq(range_values[[1]],
-                                        range_values[[2]],
-                                        by = range_by))
-        if (input$add_layer2 == "countries"){
-          sp_add <- world_map %>% crop(extent(rvs$clim_vars[[1]]))
-          scenario_plot <- scenario_plot +
-            latticeExtra::layer(sp::sp.polygons(sp_add,
-                                                lwd = 1.5,
-                                                alpha = 0.7,
-                                                col = "black"),
-                                data = list(sp_add = sp_add))
-        }
-        if (input$add_layer2 == "biomes"){
-          sp_add <- biomes_sp %>% crop(extent(rvs$clim_vars[[1]]))
-          scenario_plot <- scenario_plot +
-            latticeExtra::layer(sp::sp.polygons(sp_add,
-                                                lwd = 1.5,
-                                                alpha = 0.7,
-                                                col = "black"),
-                                data = list(sp_add = sp_add))
-        }
-        if (input$add_layer2 == "ecoregions"){
-          sp_add <- ecorregions_sp %>% crop(extent(rvs$clim_vars[[1]]))
-          scenario_plot <- scenario_plot +
-            latticeExtra::layer(sp::sp.polygons(sp_add,
-                                                lwd = 1.5,
-                                                alpha = 0.7,
-                                                col = "black"),
-                                data = list(sp_add = sp_add))
-        }
+        
+          scenario_plot <- ggplot() + 
+          tidyterra::geom_spatraster(data = scenario_data) + facet_wrap(~lyr) + tidyterra::scale_fill_wiki_c(name = "") + theme_bw()+
+          scale_x_continuous(n.breaks=3, guide = guide_axis(check.overlap = TRUE)) +
+          labs(title = paste0(long_name, " - Variation from current climate")) +
+          theme(axis.text.x = element_blank(), axis.text.y = element_blank()) 
+          
+          if (input$add_layer2 == "countries"){
+            sp_add <- world_sf %>% terra::crop(rvs$clim_vars[[1]])
+            scenario_plot <- scenario_plot +
+              tidyterra::geom_spatvector(data = sp_add, alpha = 0)
+          }
+          if (input$add_layer2 == "biomes"){
+            sp_add <- biomes %>% terra::crop(rvs$clim_vars[[1]])
+            scenario_plot <- scenario_plot +
+              tidyterra::geom_spatvector(data = sp_add, alpha = 0)
+            
+          }
+          if (input$add_layer2 == "ecoregions"){
+            
+            sp_add <- ecorregions %>% terra::crop(rvs$clim_vars[[1]])
+            scenario_plot <- scenario_plot +
+              tidyterra::geom_spatvector(data = sp_add, alpha = 0)
+          }
         
         plot_delta_pattern[[length(plot_delta_pattern) + 1]] <- scenario_plot
         names(plot_delta_pattern)[length(plot_delta_pattern)] <- b
