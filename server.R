@@ -1109,9 +1109,7 @@ server <- function(input, output) {
                                                   y_axis = table_diff_scaled %>%
                                                     dplyr::select(rvs$bio_vars_y2) %>%
                                                     rowMeans(na.rm = T)) %>%
-                     dplyr::mutate(Distance = raster::pointDistance(c(0, 0),
-                                                                    .[,2:3],
-                                                                    lonlat = FALSE)) %>%
+                     dplyr::mutate(Distance = terra::distance(cbind(x_axis, y_axis), matrix(c(0, 0), ncol = 2), lonlat = FALSE)) %>%
                      dplyr::arrange(Distance)
                    
                    ## Is within confidence intervals?
@@ -1179,9 +1177,7 @@ server <- function(input, output) {
                                                     y_axis = table_diff_unscaled %>%
                                                       dplyr::select(rvs$bio_vars_y2) %>%
                                                       rowMeans(na.rm = T)) %>%
-                     dplyr::mutate(Distance = raster::pointDistance(c(0, 0),
-                                                                    .[,2:3],
-                                                                    lonlat = FALSE)) %>%
+                     dplyr::mutate(Distance = terra::distance(cbind(x_axis, y_axis), matrix(c(0, 0), ncol = 2), lonlat = FALSE)) %>%
                      dplyr::arrange(Distance)
                    rvs$table_unscaled <- table_unscaled
                    table_realunscaled <- table_unscaled |> 
@@ -1208,9 +1204,7 @@ server <- function(input, output) {
                                                   y_axis = table_diff_deltas %>%
                                                     dplyr::select(rvs$bio_vars_y2) %>%
                                                     rowMeans(na.rm = T)) %>%
-                     dplyr::mutate(Distance = raster::pointDistance(c(0, 0),
-                                                                    .[,2:3],
-                                                                    lonlat = FALSE)) %>%
+                     dplyr::mutate(Distance = terra::distance(cbind(x_axis, y_axis), matrix(c(0, 0), ncol = 2), lonlat = FALSE)) %>%
                      dplyr::arrange(Distance)
                    
                    table_deltas <- table_deltas %>% 
