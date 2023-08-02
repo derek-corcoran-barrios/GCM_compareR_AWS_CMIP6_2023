@@ -356,13 +356,14 @@ display: none;
 <h1>ToClean</h1>
 <p><code>rvs$xaxis_lab</code> has the same values as
 <code>rvs$ycol_sc_lab</code></p>
-<p><code>rvs$clim_vars</code> or climate_scenarios in cmip6 is
-duplicated to generate</p>
 <p>in line 1155 where we can see</p>
 <pre class="r"><code>                   ##############################  Unscaled  ##############################
                    rvs$clim_vars_uns &lt;- rvs$clim_vars
                    rvs$clim_vars_uns[[length(rvs$clim_vars_uns) + 1]] &lt;- rvs$clim_baseline</code></pre>
 <p>seems to be duplicated except for the baseline</p>
+<p>This in line 940 could be uptated using terra::tapp</p>
+<pre class="r"><code>                 glue::glue(&quot;#&gt;&gt;  Dividing temperature layers in CMIP5 by 10 to get units in ºC&quot;)
+                 </code></pre>
 </div>
 
 

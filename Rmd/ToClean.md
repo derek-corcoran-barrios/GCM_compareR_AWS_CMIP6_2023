@@ -2,8 +2,6 @@
 
 `rvs$xaxis_lab` has the same values as `rvs$ycol_sc_lab`
 
-`rvs$clim_vars` or climate_scenarios in cmip6 is duplicated to generate
-
 in line 1155 where we can see
 
 ```r
@@ -13,3 +11,10 @@ in line 1155 where we can see
 ```
 
 seems to be duplicated except for the baseline
+
+
+This in line 940 could be uptated using terra::tapp
+```r
+                 glue::glue("#>>  Dividing temperature layers in CMIP5 by 10 to get units in ºC")
+                 
+```

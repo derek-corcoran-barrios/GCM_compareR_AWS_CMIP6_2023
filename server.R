@@ -534,6 +534,8 @@ server <- function(input, output) {
     if (input$extent_type == "map_country"){
       
       # Country names manually added - subset layer to overlay
+      # todebug with countries
+      # input$ext_name_country <- c("Denmark", "Germany", "Netherlannds")
       selected_countries <- world_sf[world_sf$country %in% input$ext_name_country,]
       
       map %>% 
@@ -1127,27 +1129,27 @@ server <- function(input, output) {
                    circle <- circleFun(center = c(0,0), diameter = std_error * 2, npoints = 300)
                    
                    ##############################  Real unscaled  ##############################
-                   table_diff_realunscaled <- rvs$clim_vars |> 
-                     purrr::map(~global(.x, "mean", na.rm = T)) |> 
-                     purrr::map(~rownames_to_column(.x, var = "variable")) |> 
-                     purrr::map2(names(rvs$clim_vars), ~mutate(.x, GCM = .y)) |> 
-                     purrr::reduce(bind_rows) |> 
-                     tidyr::pivot_wider(names_from = "variable", values_from = "mean")
-
-                   # Combine temperature and precipitation variables separatedly
-                   table_realunscaled <- tibble::tibble(GCM = table_diff_realunscaled %>%
-                                                          dplyr::select(GCM) %>% dplyr::pull(GCM),
-                                                        x_axis = table_diff_realunscaled %>%
-                                                          dplyr::select(rvs$bio_vars_x2) %>%
-                                                          rowMeans(na.rm = T),
-                                                        y_axis = table_diff_realunscaled %>%
-                                                          dplyr::select(rvs$bio_vars_y2) %>%
-                                                          rowMeans(na.rm = T)) %>%
-                     dplyr::mutate(Distance = raster::pointDistance(c(0, 0),
-                                                                    .[,2:3],
-                                                                    lonlat = FALSE)) 
+                   # table_diff_realunscaled <- rvs$clim_vars |> 
+                   #   purrr::map(~global(.x, "mean", na.rm = T)) |> 
+                   #   purrr::map(~rownames_to_column(.x, var = "variable")) |> 
+                   #   purrr::map2(names(rvs$clim_vars), ~mutate(.x, GCM = .y)) |> 
+                   #   purrr::reduce(bind_rows) |> 
+                   #   tidyr::pivot_wider(names_from = "variable", values_from = "mean")
+                   # 
+                   # # Combine temperature and precipitation variables separatedly
+                   # table_realunscaled <- tibble::tibble(GCM = table_diff_realunscaled %>%
+                   #                                        dplyr::select(GCM) %>% dplyr::pull(GCM),
+                   #                                      x_axis = table_diff_realunscaled %>%
+                   #                                        dplyr::select(rvs$bio_vars_x2) %>%
+                   #                                        rowMeans(na.rm = T),
+                   #                                      y_axis = table_diff_realunscaled %>%
+                   #                                        dplyr::select(rvs$bio_vars_y2) %>%
+                   #                                        rowMeans(na.rm = T)) %>%
+                   #   dplyr::mutate(Distance = raster::pointDistance(c(0, 0),
+                   #                                                  .[,2:3],
+                   #                                                  lonlat = FALSE)) 
                    
-                   rvs$table_realunscaled <- table_realunscaled
+                   
                    
                    #############################################################################
                    
@@ -1159,24 +1161,13 @@ server <- function(input, output) {
                    rvs$clim_vars_uns[[length(rvs$clim_vars_uns) + 1]] <- rvs$clim_ens
                    names(rvs$clim_vars_uns)[length(rvs$clim_vars_uns)] <- "ENSEMBLE"
                    
+                   table_diff_unscaled <- rvs$clim_vars_uns |> 
+                     purrr::map(~global(.x, "mean", na.rm = T)) |> 
+                     purrr::map(~rownames_to_column(.x, var = "variable")) |> 
+                     purrr::map2(names(rvs$clim_vars_uns), ~mutate(.x, GCM = .y)) |> 
+                     purrr::reduce(bind_rows) |> 
+                     tidyr::pivot_wider(names_from = "variable", values_from = "mean")
                    
-                   table_diff_unscaled <- list()
-                   for (v in names(rvs$clim_vars_uns[[1]])){
-                     temp_table <- rvs$clim_vars_uns %>%
-                       purrr::map(~ .x[[v]]) %>%
-                       purrr::map_dfc(~ raster::values(.x)) %>% t()
-                     temp_table <- temp_table %>%
-                       as.data.frame() %>%
-                       tibble::rownames_to_column("GCM") %>%
-                       tibble::as_tibble()
-                     table_diff_unscaled[[length(table_diff_unscaled) + 1]] <- temp_table
-                     names(table_diff_unscaled)[length(table_diff_unscaled)] <- v
-                   }
-                   
-                   # Calculare means for each GCM and combine in one unique table
-                   table_diff_unscaled <- table_diff_unscaled %>%
-                     purrr::map_dfc(~ rowMeans(.x[,2:ncol(.x)], na.rm = T)) %>%
-                     dplyr::bind_cols(table_diff_unscaled[[1]][,1])
                    
                    # Combine temperature and precipitation variables separatedly
                    table_unscaled <- tibble::tibble(GCM = table_diff_unscaled %>%
@@ -1192,29 +1183,21 @@ server <- function(input, output) {
                                                                     lonlat = FALSE)) %>%
                      dplyr::arrange(Distance)
                    rvs$table_unscaled <- table_unscaled
+                   table_realunscaled <- table_unscaled |> 
+                     dplyr::filter(!(GCM %in% c("ENSEMBLE", "BASELINE")))
+                   rvs$table_realunscaled <- table_realunscaled
                    
                    ##############################  Deltas  ##############################
                    rvs$clim_delta2 <- rvs$clim_delta
                    rvs$clim_delta2[[length(rvs$clim_delta2) + 1]] <- rvs$clim_delta_ensemble
                    names(rvs$clim_delta2)[length(rvs$clim_delta2)] <- "ENSEMBLE"
                    
-                   table_diff_deltas <- list()
-                   for (v in names(rvs$clim_delta2[[1]])){
-                     temp_table <- rvs$clim_delta2 %>%
-                       purrr::map(~ .x[[v]]) %>%
-                       purrr::map_dfc(~ raster::values(.x)) %>% t()
-                     temp_table <- temp_table %>%
-                       as.data.frame() %>%
-                       tibble::rownames_to_column("GCM") %>%
-                       tibble::as_tibble()
-                     table_diff_deltas[[length(table_diff_deltas) + 1]] <- temp_table
-                     names(table_diff_deltas)[length(table_diff_deltas)] <- v
-                   }
-                   
-                   # Calculare means for each GCM and combine in one unique table
-                   table_diff_deltas <- table_diff_deltas %>%
-                     purrr::map_dfc(~ rowMeans(.x[,2:ncol(.x)], na.rm = T)) %>%
-                     dplyr::bind_cols(table_diff_deltas[[1]][,1])
+                   table_diff_deltas <- rvs$clim_delta2 |> 
+                     purrr::map(~global(.x, "mean", na.rm = T)) |> 
+                     purrr::map(~rownames_to_column(.x, var = "variable")) |> 
+                     purrr::map2(names(rvs$clim_delta2), ~mutate(.x, GCM = .y)) |> 
+                     purrr::reduce(bind_rows) |> 
+                     tidyr::pivot_wider(names_from = "variable", values_from = "mean")
                    
                    table_deltas <- tibble::tibble(GCM = table_diff_deltas %>%
                                                     dplyr::select(GCM) %>% dplyr::pull(GCM),
