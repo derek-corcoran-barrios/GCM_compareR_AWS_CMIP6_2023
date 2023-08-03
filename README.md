@@ -17,3 +17,6 @@ to inlcude functions and modules
 in order to estimate a 95% confidence interval of the ensemble model
 
 ### Modules
+
+**GCMsSummaryTableModule.R:** this generates the tables in the tab
+Summary table of GCMs within the scenario tab

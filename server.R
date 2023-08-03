@@ -33,7 +33,7 @@ rvs <- shiny::reactiveValues(ext_user = terra::ext(-180, 180, -60, 90),
                       available_gcms = NULL)
 # To debbug
 # rvs <- list()
-# rvs$ext_user = extent(-180, 180, -60, 90)
+# rvs$ext_user = terra::ext(-180, 180, -60, 90)
 # rvs$still_no_analyse = NULL
 # rvs$available_gcms = NULL
 
