@@ -1,9 +1,6 @@
 # CMIPSelectionModule.R
 
 # Define UI function for CMIP selection module
-# CMIPSelectionModule.R
-
-# Define UI function for CMIP selection module
 CMIPSelectionModuleUI <- function(id) {
   ns <- NS(id)
   shiny::fluidRow(
@@ -11,10 +8,10 @@ CMIPSelectionModuleUI <- function(id) {
       width = 6,
       div(style="display:inline-block", h5("1. Select a CMIP version")),
       shiny::radioButtons(ns("cmip"), "", #"Select a CMIP version",
-                   inline = TRUE,
-                   c("CMIP5" = "cmip5",
-                     "CMIP6" = "cmip6"),
-                   selected = "cmip6"),
+                          inline = TRUE,
+                          c("CMIP5" = "cmip5",
+                            "CMIP6" = "cmip6"),
+                          selected = "cmip6"),
       div(style="display:inline-block", h5("2. Climate Change Scenario")),
       shiny::radioButtons(ns("year_type"), "Year",
                           inline = TRUE,
@@ -42,7 +39,8 @@ CMIPSelectionModuleServer <- function(id) {
                              selected = "2081-2100")
           
           # SSP options for CMIP6
-          updateRadioButtons(session, "scenario_type", 
+          updateRadioButtons(session, "scenario_type",
+                             label = "Shared Socioeconomic Pathway (SSP)",
                              choices = c("ssp126", "ssp245", "ssp370", "ssp585"),
                              selected = "ssp245")
           
@@ -53,7 +51,8 @@ CMIPSelectionModuleServer <- function(id) {
                              selected = "2070")
           
           # RCP options for CMIP5
-          updateRadioButtons(session, "scenario_type", 
+          updateRadioButtons(session, "scenario_type",
+                             label = "Representative Concentration Pathway (RCP)",
                              choices = c("rcp26", "rcp45", "rcp60", "rcp85"),
                              selected = "rcp45")
         }
