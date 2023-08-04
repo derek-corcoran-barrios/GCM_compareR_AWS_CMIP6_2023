@@ -20,3 +20,6 @@ in order to estimate a 95% confidence interval of the ensemble model
 
 **GCMsSummaryTableModule.R:** this generates the tables in the tab
 Summary table of GCMs within the scenario tab
+
+**CMIPSelectionModule.R:** This generates the UI for selecting GCMs and
+scenarios

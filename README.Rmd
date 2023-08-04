@@ -27,3 +27,5 @@ The goal of GCM_compareR_AWS_CMIP6_2023 is to upate the GCMCompareR app to inlcu
 ### Modules
 
 **GCMsSummaryTableModule.R:** this generates the tables in the tab Summary table of GCMs within the scenario tab
+
+**CMIPSelectionModule.R:** This generates the UI for selecting GCMs and scenarios

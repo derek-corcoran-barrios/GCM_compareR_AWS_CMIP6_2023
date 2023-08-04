@@ -9,9 +9,13 @@ CMIPSelectionModuleUI <- function(id) {
   shiny::fluidRow(
     shiny::column(
       width = 6,
-      shiny::selectInput(ns("cmip"), "Choose CMIP Version", 
-                         choices = c("cmip6", "cmip5"), 
-                         selected = "cmip6"),
+      div(style="display:inline-block", h5("1. Select a CMIP version")),
+      shiny::radioButtons(ns("cmip"), "", #"Select a CMIP version",
+                   inline = TRUE,
+                   c("CMIP5" = "cmip5",
+                     "CMIP6" = "cmip6"),
+                   selected = "cmip6"),
+      div(style="display:inline-block", h5("2. Climate Change Scenario")),
       shiny::radioButtons(ns("year_type"), "Year",
                           inline = TRUE,
                           choices = c("2021-2040", "2041-2060", "2061-2080", "2081-2100"),
