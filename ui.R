@@ -338,12 +338,8 @@ ui <- tagList(
                                     value = "scenario_instructions",
                                     column(12,
                                            h6("This table include the details for all GCMs available in GCM compareR. Notice that not all GCM are available for all scenarios"),
-                                           hr(),
-                                           h6("CMIP6"),
-                                           tableOutput("GCMs_table_CMIP6"),
-                                           hr(),
-                                           h6("CMIP5"),
-                                           tableOutput("GCMs_table_CMIP5"),
+                                           CombinedGCMsSummaryModuleUI("GCMs_table_CMIP6"),
+                                           CombinedGCMsSummaryModuleUI("GCMs_table_CMIP5")
                                     ))
                            )
                )

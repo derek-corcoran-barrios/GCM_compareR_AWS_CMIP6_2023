@@ -16,12 +16,6 @@ biomes <- terra::vect("data/biomes.shp")
 ecorregions <- terra::vect("data/Ecoregions2017.shp")
 
 
-# Table of available GCMs
-table_GCMs_CMIP6 <- readr::read_csv("data/GCMs_details_CMIP6.csv")
-table_GCMs_CMIP5 <- readr::read_csv("data/GCMs_details_CMIP5.csv") |>  
-  dplyr::select(-"Actual name")
-
-
 ##############################################################################################################################################################################
 ########################################    SERVER   ######################################################################################################################
 ##############################################################################################################################################################################
@@ -96,17 +90,9 @@ server <- function(input, output) {
   
   
   # Generate table of available GCMs
-  output$GCMs_table_CMIP6 <- function(){
-    table_GCMs_CMIP6 %>%
-      knitr::kable("html") %>%
-      kable_styling("striped", full_width = F)
-  }
-  output$GCMs_table_CMIP5 <- function(){
-    table_GCMs_CMIP5 %>%
-      knitr::kable("html") %>%
-      kable_styling("striped", full_width = F)
-  }
   
+  CombinedGCMsSummaryModuleServer("GCMs_table_CMIP6", "data/GCMs_details_CMIP6.csv", "CMIP6")
+  CombinedGCMsSummaryModuleServer("GCMs_table_CMIP5", "data/GCMs_details_CMIP6.csv", "CMIP5")
   
   ##################################################
   #### Scenario selection tab
