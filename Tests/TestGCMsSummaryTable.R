@@ -11,19 +11,18 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(),
     mainPanel(
-      GCMsSummaryTableModuleUI("GCMs_summary_CMIP6"),
-      GCMsSummaryTableModuleUI("GCMs_summary_CMIP5")
+      CombinedGCMsSummaryModuleUI("Combined_GCMs_summary_CMIP6"),
+      CombinedGCMsSummaryModuleUI("Combined_GCMs_summary_CMIP5")
     )
   )
 )
 
 # Define the server for the main app
 server <- function(input, output, session) {
-  # Use the GCMsSummaryTableModule with different data
+  # Use the CombinedGCMsSummaryModule with different data
   
-  GCMsSummaryTableModuleServer("GCMs_summary_CMIP6", CMIP6_path)
-  
-  GCMsSummaryTableModuleServer("GCMs_summary_CMIP5", CMIP5_path)
+  CombinedGCMsSummaryModuleServer("Combined_GCMs_summary_CMIP6", CMIP6_path, "CMIP6")
+  CombinedGCMsSummaryModuleServer("Combined_GCMs_summary_CMIP5", CMIP5_path, "CMIP5")
   
   # ... Other server code ...
 }
