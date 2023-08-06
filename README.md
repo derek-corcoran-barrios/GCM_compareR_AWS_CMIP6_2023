@@ -23,3 +23,6 @@ Summary table of GCMs within the scenario tab
 
 **CMIPSelectionModule.R:** This generates the UI for selecting GCMs and
 scenarios
+
+**CountryMapModule.R:** Thes generates the UI for selecting a country
+for the GCM Comparison
