@@ -1,7 +1,4 @@
 library(shiny)
-# Load app
-source("ui.R")
-source("server.R")
 
 # Load functions
 source("circleFun.R")
@@ -9,5 +6,10 @@ source("circleFun.R")
 # Load modules
 
 source("GCMsSummaryTableModule.R")
+
+# Load app
+source("ui.R")
+source("server.R")
+
 
 shinyApp(ui, server)

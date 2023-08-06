@@ -440,7 +440,7 @@ server <- function(input, output) {
     addLayersControl(baseGroups = c("Relieve", "Countries"),
                      options = layersControlOptions(collapsed = FALSE)) %>% 
     setView(0,0, zoom = 2) %>% 
-    addDrawToolbar(targetGroup = 'draw', 
+    leaflet.extras::addDrawToolbar(targetGroup = 'draw', 
                    singleFeature = TRUE,
                    rectangleOptions = filterNULL(list(
                      shapeOptions = drawShapeOptions(fillColor = "#8e113f",

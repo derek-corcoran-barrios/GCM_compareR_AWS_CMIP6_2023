@@ -161,15 +161,9 @@ ui <- tagList(
                conditionalPanel("input.map_panel != 'scenario_individual'",
                                 
                                 
-                                #############
-                                # hr(),
-                                
                                 ############# Climate Change Scenario
                                 div(style="display:inline-block", h5("2. Climate Change Scenario")),
-                                # div(style="display:inline-block", shiny::actionButton(inputId = "CC_scenario",
-                                #                                                       label = NULL,
-                                #                                                       icon = icon("angle-down", class = "fas"))),
-                                
+
                                 # Year
                                 uiOutput("cmip_year"),
                                 
@@ -184,8 +178,6 @@ ui <- tagList(
                                                                 # "5 arc-min" = "5m"
                                                     ),
                                                     selected = "10m")),
-                                # textOutput("selected_scenario"),
-                                # hr(),
                                 
                                 ############## General Circulation Models (GCMs)
                                 div(style="display:inline-block", h5("3. General Circulation Models (GCMs)")),
