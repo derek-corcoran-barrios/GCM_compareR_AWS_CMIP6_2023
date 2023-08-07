@@ -626,7 +626,7 @@ server <- function(input, output) {
     # Countries selected by ecorregion name
     if (input$extent_type == "map_ecorregions"){
       
-      selected_ecorregions <- ecorregions[ecorregions$ECO_NAME %in% input$ext_name_ecorregions]
+      selected_ecorregions <- ecorregions[ecorregions$ECO_NAME %in% input$ext_name_ecorregions,]
       
       # Add polygons to leaflet
       map %>% 

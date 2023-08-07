@@ -7,16 +7,17 @@ library(terra)
 
 source("CountryMapModule.R")
 source("BIomeMapModule.R")
-
+source("EcorregionMapModule.R")
 # Read the world map shapefile
 world_sf <- terra::vect("data/world_map.shp")
 biomes <- terra::vect("data/biomes.shp")
-
+ecorregions <- terra::vect("data/Ecoregions2017.shp")
 # Define the UI for the main app
 ui <- fluidPage(
   titlePanel("Country Selection App"),
   CountryMapModuleUI("country_map_module"),
   BiomeMapModuleUI("biome_map_module"),
+  EcorregionMapModuleUI("ecorregion_map_module"),
   radioButtons(
     inputId = "extent_type",
     label = NULL,
@@ -60,8 +61,8 @@ server <- function(input, output, session) {
   map_proxy <- reactive(leafletProxy("map"))
   
   CountryMapModuleServer("country_map_module", map_proxy, world_sf,ex_type, rvs)
-  
   BiomeMapModuleServer("biome_map_module", map_proxy, biomes,ex_type, rvs)
+  EcorregionMapModuleServer("ecorregion_map_module", map_proxy, ecorregions,ex_type, rvs)
   
   output$Text <- renderText({
     # Fix 2: Access the 'country' column directly from rvs$polySelXY

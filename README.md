@@ -24,5 +24,11 @@ Summary table of GCMs within the scenario tab
 **CMIPSelectionModule.R:** This generates the UI for selecting GCMs and
 scenarios
 
-**CountryMapModule.R:** Thes generates the UI for selecting a country
+**CountryMapModule.R:** This generates the UI for selecting a country
 for the GCM Comparison
+
+**BiomeMapModule.R:** This generates the UI for selecting a biome for
+the GCM Comparison
+
+**EcorregionMapModule.R:** This generates the UI for selecting an
+ecorriegion for the GCM Comparison
