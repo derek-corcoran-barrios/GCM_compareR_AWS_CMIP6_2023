@@ -45,7 +45,11 @@ CountryMapModuleServer <- function(id, map, world_sf,extent_type, rvs) {
                         weight = 1,
                         fillOpacity = 0,
                         opacity = 0.5,
-                        color = "#595959") %>%
+                        color = "#595959",
+                        popup = ~country,
+                        label = ~country,
+                        highlightOptions = highlightOptions(color = "#FFA500", weight = 2,
+                                                            bringToFront = TRUE)) %>%
             addPolygons(data = sf::st_as_sf(selected_countries),
                         group = "countrySel",
                         weight = 1,

@@ -40,7 +40,11 @@ EcorregionMapModuleServer <- function(id, map, ecorregions,extent_type, rvs) {
                         fillOpacity = 0,
                         opacity = 0.5,
                         # smoothFactor = 3,
-                        color = "#595959") %>% 
+                        color = "#595959",
+                        popup = ~ECO_NAME,
+                        label = ~ECO_NAME,
+                        highlightOptions = highlightOptions(color = "#FFA500", weight = 2,
+                                                            bringToFront = TRUE)) %>% 
             # Highlight selected ecorregions
             addPolygons(data = sf::st_as_sf(selected_ecorregions), 
                         group = "ecorregionsSel",
