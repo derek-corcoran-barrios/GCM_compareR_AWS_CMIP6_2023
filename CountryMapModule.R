@@ -4,12 +4,22 @@
 CountryMapModuleUI <- function(id) {
   ns <- NS(id)
   shiny::conditionalPanel(
-    condition = "input.extent_type == 'map_country'", ns("extent_type"),
+    condition = "input.extent_type == 'map_country'", 
+    ns("extent_type"),
     shiny::selectInput(ns("ext_name_country"), "Enter country name(s)",
                        choices = world_sf$country,
                        multiple = TRUE, selected = NULL)
   )
 }
+
+
+  #shiny::conditionalPanel(
+  #  condition = "input.extent_type == 'map_biomes'", 
+  #  ns("extent_type"),
+  #  shiny::selectInput(ns("ext_name_biomes"), "Enter biome(s) name(s)",
+  #                    choices = biomes$BIOME_NAME,
+  #                     multiple = TRUE,selected = NULL)
+  #  )
 
 # Define server function for country selection module
 CountryMapModuleServer <- function(id, map, world_sf,extent_type, rvs) {

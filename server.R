@@ -574,7 +574,7 @@ server <- function(input, output) {
     # Countries selected by biome name
     if (input$extent_type == "map_biomes"){
       
-      selected_biomes <- biomes[biomes$BIOME_NAME %in% input$ext_name_biomes]
+      selected_biomes <- biomes[biomes$BIOME_NAME %in% input$ext_name_biomes,]
       
       # Add polygons to leaflet
       map %>% 
