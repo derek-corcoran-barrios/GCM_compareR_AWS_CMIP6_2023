@@ -32,3 +32,9 @@ the GCM Comparison
 
 **EcorregionMapModule.R:** This generates the UI for selecting an
 ecorriegion for the GCM Comparison
+
+**DrawMapModule.R:** This generates the UI for selecting an area by
+drawing a square for the GCM Comparison
+
+**MapModule.R:** A metamodule containing CountryMapModule,
+BiomeMapModule, EcorregionMapModule and DrawMapModule

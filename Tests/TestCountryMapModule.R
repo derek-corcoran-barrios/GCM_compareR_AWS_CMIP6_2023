@@ -8,6 +8,7 @@ library(terra)
 source("CountryMapModule.R")
 source("BIomeMapModule.R")
 source("EcorregionMapModule.R")
+source("DrawMapModule.R")
 # Read the world map shapefile
 world_sf <- terra::vect("data/world_map.shp")
 biomes <- terra::vect("data/biomes.shp")
@@ -18,6 +19,7 @@ ui <- fluidPage(
   CountryMapModuleUI("country_map_module"),
   BiomeMapModuleUI("biome_map_module"),
   EcorregionMapModuleUI("ecorregion_map_module"),
+  #DrawMapModuleUI("draw_map_module"),
   radioButtons(
     inputId = "extent_type",
     label = NULL,
@@ -29,7 +31,8 @@ ui <- fluidPage(
       "Enter bounding-box coordinates" = "map_bbox"
     )),
   leafletOutput("map"),
-  textOutput("Text")
+  textOutput("Text"),
+  textOutput("Extent")
 )
 
 # Define the server for the main app
@@ -39,6 +42,7 @@ server <- function(input, output, session) {
   rvs$saved_bbox <- NULL
   
   ex_type <- reactive(input$extent_type)
+  draw_new <- reactive(req(input$map_draw_new_feature))
   
   # Create a leaflet map
   m <- leaflet(sf::st_as_sf(world_sf)) %>% 
@@ -63,6 +67,7 @@ server <- function(input, output, session) {
   CountryMapModuleServer("country_map_module", map_proxy, world_sf,ex_type, rvs)
   BiomeMapModuleServer("biome_map_module", map_proxy, biomes,ex_type, rvs)
   EcorregionMapModuleServer("ecorregion_map_module", map_proxy, ecorregions,ex_type, rvs)
+  DrawMapModuleServer(id = "draw_map_module", map = map_proxy, draw_new = draw_new, ex_type, rvs)
   
   output$Text <- renderText({
     # Fix 2: Access the 'country' column directly from rvs$polySelXY
@@ -72,6 +77,15 @@ server <- function(input, output, session) {
       "No countries selected"
     }
   })
+  
+   output$Extent <- renderText({
+     # Fix 2: Access the 'country' column directly from rvs$polySelXY
+     if (!is.null(rvs$saved_bbox)) {
+      paste("Selected extent:", as.character(rvs$saved_bbox))
+     } else {
+       "No extent selected"
+     }
+   })
 }
 
 # Run the Shiny app
